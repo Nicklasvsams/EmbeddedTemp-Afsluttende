@@ -2,22 +2,22 @@
 #include <wire.h>
 #define DS1621_Address 0x48
 
-#define ACCESS_TH 0xA1 // access high temperature register
 #define ACCESS_TL 0xA2 // access low temperature register
+#define ACCESS_TH 0xA1 // access high temperature register
 void setThresh(byte reg, int tC);
 
 void setup()
 {
   Wire.begin(); // join i2c bus
-  setThresh(ACCESS_TL, 27);               // low temp threshold = 75F                   
-  setThresh(ACCESS_TH, 28);               // high temp threshold = 80F
+  setThresh(ACCESS_TH, 26);               // high temp threshold = 80F
+  setThresh(ACCESS_TL, 24);               // low temp threshold = 75F                   
   Wire.beginTransmission(DS1621_Address); // connect to DS1621 (send DS1621 address)
   Wire.write(0xAC);                       // send configuration register address (Access Config)
   Wire.write(0);                          // perform continuous conversion
   Wire.beginTransmission(DS1621_Address); // send repeated start condition                // Temp
   Wire.write(0xEE);                       // send start temperature conversion command    // Temp
   Wire.endTransmission();
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("Starting up :)");
 }
 
