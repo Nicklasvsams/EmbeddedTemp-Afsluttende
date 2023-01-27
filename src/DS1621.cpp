@@ -13,14 +13,14 @@
  * og sætter en øvre grænse for TOut termostaten til 26 grader og 24 grader på den nedre grænse.
  */
 void setupDS1621(){
-  Wire.begin();                           /** Forbinder til I2C bus */
-  setThreshold(26, 24);                      /** Sætter temperatur max og min grænse */         
-  Wire.beginTransmission(DS1621_Address); /** Forbind til DS1621 */
-  Wire.write(0xAC);                       /** Send konfiguration register addressen (Access Config) */
+  Wire.begin();                           // Forbinder til I2C bus 
+  setThreshold(26, 24);                   // Sætter temperatur max og min grænse        
+  Wire.beginTransmission(DS1621_Address); // Forbind til DS1621 
+  Wire.write(0xAC);                       // Send konfiguration register addressen (Access Config) 
   Wire.write(0);                         
   Wire.beginTransmission(DS1621_Address); 
-  Wire.write(0xEE);                       /** Sørger for at der bliver sendt kontinuerlig opdatering af temperatur. */
-  Wire.endTransmission();                 /** Lukker forbindelsen. */
+  Wire.write(0xEE);                       // Sørger for at der bliver sendt kontinuerlig opdatering af temperatur. 
+  Wire.endTransmission();                 // Lukker forbindelsen. 
 }
 
 /**
