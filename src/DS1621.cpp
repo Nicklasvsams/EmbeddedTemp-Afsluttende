@@ -1,5 +1,6 @@
 #include <wire.h>
 #include <Arduino.h>
+#include "function.h"
 
 #define DS1621_Address 0x48 /** DS1621 Konfigurations register */
 #define ACCESS_TL 0xA2 /** Lav temperatur termostat register */ 
