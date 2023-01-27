@@ -14,8 +14,7 @@
  */
 void setupDS1621(){
   Wire.begin();                           /** Forbinder til I2C bus */
-  setThresh(ACCESS_TH, 26);               /** Sætter temperatur max grænse */
-  setThresh(ACCESS_TL, 24);               /** Sætter temperatur min grænse */         
+  setThreshold(26, 24);                      /** Sætter temperatur max og min grænse */         
   Wire.beginTransmission(DS1621_Address); /** Forbind til DS1621 */
   Wire.write(0xAC);                       /** Send konfiguration register addressen (Access Config) */
   Wire.write(0);                         
@@ -67,23 +66,30 @@ String getTemperature(){
 
 /**
  * Funktion der sætter øvre eller nedre grænse for termostaten.
- *  @param reg Den access konfiguration vi skal tilgå for at sætte en grænse (0xA1 eller 0xA2)
- *  @param temp Den temperatur den øvre/nedre grænse skal sættes til
+ *  @param HTemp Den temperatur den øvre grænse skal sættes til
+ *  @param LTemp Den temperatur den nedre grænse skal sættes til
  */
-void setThresh(byte reg, int temp)
+void setThreshold(int HTemp, int LTemp)
 {
-  if (reg == ACCESS_TL || reg == ACCESS_TH)
-  {
     Wire.beginTransmission(DS1621_Address);
     
-    // Baseret på parameter, får vi enten adgang til konfiguration af øvre termostat grænse (0xA1) eller nedre (0xA2)
-    Wire.write(reg);
+    // Adgang til konfiguration af øvre termostat grænse (0xA1)
+    Wire.write(ACCESS_TH);
 
-    
     // Sender byte værdien af temperatur parameteren
-    Wire.write(byte(temp));
+    Wire.write(byte(HTemp));
     Wire.write(0);
     Wire.endTransmission();
     delay(15);
-  } 
+
+    Wire.beginTransmission(DS1621_Address);
+    
+    // Adgang til konfiguration af nedre termostat grænse (0xA2)
+    Wire.write(ACCESS_TL);
+
+    // Sender byte værdien af temperatur parameteren
+    Wire.write(byte(LTemp));
+    Wire.write(0);
+    Wire.endTransmission();
+    delay(15);
 }

@@ -3,5 +3,5 @@
 void clientSetup();
 void clientLoop(String tempString);
 void setupDS1621();
-void setThresh(byte reg, int tC);
+void setThreshold(int HTemp, int LTemp);
 String getTemperature();
