@@ -16,7 +16,6 @@ void setup(){
 */
 void loop()
 {
-  clientLoop("24");
-  // clientLoop(getTemperature());
+  clientLoop(getTemperature());
   delay(1000);
 }

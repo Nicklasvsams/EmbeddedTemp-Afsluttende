@@ -46,6 +46,7 @@ void clientSetup() {
 
 /**
  * WebServerens client loop, der bliver kaldt 
+ * Tjekker input fra klient og ændrer grænseværdi for termostat.
  * @param tempString En formatteret string med en temperatur.
 */
 void clientLoop(String tempString) {
@@ -85,32 +86,7 @@ void clientLoop(String tempString) {
                             Serial.println(inputValue);
                         }
 
-                        if (request.indexOf("comfortTempValue") == 15) {
-                            inputValue = "";
-                            indexToStartAt = 33;
-                            
-                            for (int i = indexToStartAt; i < indexToStartAt + 3 ; i++)
-                            {
-                                if (request.charAt(i) == ' ') break;
-
-                                inputValue.concat(request.charAt(i));
-                            }
-                            
-                            indexToStartAt = 52;
-
-                            for (int i = indexToStartAt; i < indexToStartAt + 3 ; i++)
-                            {
-                                if (request.charAt(i) == ' ') break;
-
-                                inputValue.concat(request.charAt(i));
-                            }
-
-                            setThreshold(inputValue.toInt() + 1, inputValue.toInt() - 1);
-
-                            Serial.println(inputValue);
-                        }
-                        
-                        Serial.print(request);
+                        // TODO: Sæt komfort og spare temperatur
 
                         request="";
                     }
