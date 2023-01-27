@@ -1,5 +1,7 @@
 #include <SPI.h>
 #include <Ethernet.h>
+#include <string.h>
+#include "function.h"
 
 // Sætter MAC addresse, IP addresse og porten for HTTP kommunikation på Arduino WebServeren
 byte mac[] = {
@@ -47,96 +49,155 @@ void clientSetup() {
  * @param tempString En formatteret string med en temperatur.
 */
 void clientLoop(String tempString) {
-  // Lytter efter indkommende klienter
-  EthernetClient client = server.available();
-  if (client) {
-    Serial.println("new client");
-    // HTTP anmodning ender med en blank linje
-    bool currentLineIsBlank = true;
-    while (client.connected()) {
-      if (client.available()) {
-        char c = client.read();
-        Serial.write(c);
-        // Hvis request er kommet til en blank linje, så kan serveren sende
-        // information tilbage til klienten
-        if (c == '\n' && currentLineIsBlank) {
-            // Sender en standard HTTP response
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-Type: text/html");
-            client.println("Connection: close"); 
-            client.println("Refresh: 5");
-            client.println(); 
+    
+    String request;
+
+    // Lytter efter indkommende klienter
+    EthernetClient client = server.available();
+
+    if (client) {
+        Serial.println("new client");
+        // HTTP anmodning ender med en blank linje
+        bool currentLineIsBlank = true;
+        while (client.connected()) {
+            if (client.available()) {
+
+                char c = client.read();
+                request.concat(c);
+                    
+                    if(c=='\n'){
+                        int indexToStartAt = 0;
+                        String inputValue = "";
+
+                        if (request.indexOf("tempValue") == 15) {
+                            inputValue = "";
+                            indexToStartAt = 25;
+                            
+                            for (int i = indexToStartAt; i < indexToStartAt + 3 ; i++)
+                            {
+                                if (request.charAt(i) == ' ') break;
+
+                                inputValue.concat(request.charAt(i));
+                            }
+
+                            setThreshold(inputValue.toInt() + 1, inputValue.toInt() - 1);
+
+                            Serial.println(inputValue);
+                        }
+
+                        if (request.indexOf("comfortTempValue") == 15) {
+                            inputValue = "";
+                            indexToStartAt = 33;
+                            
+                            for (int i = indexToStartAt; i < indexToStartAt + 3 ; i++)
+                            {
+                                if (request.charAt(i) == ' ') break;
+
+                                inputValue.concat(request.charAt(i));
+                            }
+                            
+                            indexToStartAt = 52;
+
+                            for (int i = indexToStartAt; i < indexToStartAt + 3 ; i++)
+                            {
+                                if (request.charAt(i) == ' ') break;
+
+                                inputValue.concat(request.charAt(i));
+                            }
+
+                            setThreshold(inputValue.toInt() + 1, inputValue.toInt() - 1);
+
+                            Serial.println(inputValue);
+                        }
+                        
+                        Serial.print(request);
+
+                        request="";
+                    }
             
-            const char index_html1[] PROGMEM = R"rawliteral(
-                <!DOCTYPE html>
-                <html>
-                <style>
-                input[type=text], select {
-                  width: 100%;
-                  padding: 12px 20px;
-                  margin: 8px 0;
-                  display: inline-block;
-                  border: 1px solid #ccc;
-                  border-radius: 4px;
-                  box-sizing: border-box;
-                }
-                input[type=submit] {
-                  width: 100%;
-                  background-color: #4CAF50;
-                  color: white;
-                  padding: 14px 20px;
-                  margin: 8px 0;
-                  border: none;
-                  border-radius: 4px;
-                  cursor: pointer;
-                }
-                input[type=submit]:hover {
-                  background-color: #45a049;
-                }
-                div {
-                  border-radius: 5px;
-                  background-color: #f2f2f2;
-                  padding: 20px;
-                }
-                </style>
-                <body>
-                    <h3>Varmestyringsanl&aelig;g</h3>
+            // Hvis request er kommet til en blank linje, så kan serveren sende
+            // information tilbage til klienten
+            if (c == '\n' && currentLineIsBlank) {
+                // Sender en standard HTTP response
+                client.println("HTTP/1.1 200 OK");
+                client.println("Content-Type: text/html");
+                client.println("Connection: close"); 
+                client.println("Refresh: 5");
+                client.println(); 
+
+                const char index_html1[] PROGMEM = R"rawliteral(
+                    <!DOCTYPE html>
+                    <html>
+                    <style>
+                    input[type=text], select {
+                      width: 100%;
+                      padding: 12px 20px;
+                      margin: 8px 0;
+                      display: inline-block;
+                      border: 1px solid #ccc;
+                      border-radius: 4px;
+                      box-sizing: border-box;
+                    }
+                    input[type=submit] {
+                      width: 100%;
+                      background-color: #4CAF50;
+                      color: white;
+                      padding: 14px 20px;
+                      margin: 8px 0;
+                      border: none;
+                      border-radius: 4px;
+                      cursor: pointer;
+                    }
+                    input[type=submit]:hover {
+                      background-color: #45a049;
+                    }
+                    div {
+                      border-radius: 5px;
+                      background-color: #f2f2f2;
+                      padding: 20px;
+                    }
+                    </style>
+                    <body>
+                        <h3>Varmestyringsanl&aelig;g</h3>
+                        <br>
+                        <h4>Temperatur: )rawliteral";
+
+
+                const char index_html2[] PROGMEM = R"rawliteral(
+                    </h4>
+                    <div>
+                      <form action="/post_temp">
+                        <label for="fname">Indtast temperatur</label>
+                        <input type="text" id="tempValue" name="tempValue">
+                        <input type="submit" value="Bekr&aelig;ft temperatur">
+                        </form>
+
+                         <form action="/post_termo">              
+                        <label for="lname">Indtast komfort temperatur</label>
+                        <input type="text" id="comfortTempValue" name="comfortTempValue">
+                         <label for="lname">Indtast spare temperatur</label>
+                        <input type="text" id="savingTempValue" name="savingTempValue">
+
+                        <input type="submit" value="Bekr&aelig;ft komfort- og sparetemperatur">
+                        </form>
+
+                    </div>
                     <br>
-                    <h4>Temperatur: )rawliteral";
-                
+                  </form><br>
+                </body></html>)rawliteral";
 
-            const char index_html2[] PROGMEM = R"rawliteral(
-                </h4>
-                <div>
-                  <form action="/action_page.php">
-                    <label for="fname">Indtast temperatur</label>
-                    <input type="text" id="tempValue" name="tempValue">
-                                   
-                    <input type="submit" value="Bekr&aelig;ft temperatur">
-                    <label for="lname">Indtast komfort temperatur</label>
-                    <input type="text" id="comfortTempValue" name="comfortTempValue">
-                     <label for="lname">Indtast spare temperatur</label>
-                    <input type="text" id="savingTempValue" name="savingTempValue">
-                  
-                    <input type="submit" value="Bekr&aelig;ft komfort- og sparetemperatur">
-                  </form>
-                </div>
-                <br>
-              </form><br>
-            </body></html>)rawliteral";
+                client.print(index_html1);
+                client.println(tempString);
+                client.println(index_html2);
+            }
 
-            client.print(index_html1);
-            client.println(tempString);
-            client.println(index_html2);
-        }
-
-        if (c == '\n') {
-          // you're starting a new line
-          currentLineIsBlank = true;
-        } else if (c != '\r') {
-          // you've gotten a character on the current line
-          currentLineIsBlank = false;
-        }
+            if (c == '\n') {
+              // you're starting a new line
+              currentLineIsBlank = true;
+            } else if (c != '\r') {
+              // you've gotten a character on the current line
+              currentLineIsBlank = false;
+            }
       }
     }
     // give the web browser time to receive the data
